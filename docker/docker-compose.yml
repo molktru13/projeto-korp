@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  http-server-projeto-korp:
+    image: http-server-projeto-korp:latest
+    # A build process outside docker-compose or via build: directive. 
+    # The requirement says "Baseado na imagem construída anteriormente". 
+    # So Ansible will build it first, then docker-compose will use it.
+    networks:
+      - korp-network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d/
+    networks:
+      - korp-network
+    depends_on:
+      - http-server-projeto-korp
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - korp-network
+    depends_on:
+      - http-server-projeto-korp
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ../grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - korp-network
+    depends_on:
+      - prometheus
+
+networks:
+  korp-network:
+    external: true
+    # The network is created before running docker-compose, per requirements:
+    # "Crie uma rede Docker no modo bridge para comunicação entre containers"
+    # "criação da rede Docker" (in Ansible playbook)

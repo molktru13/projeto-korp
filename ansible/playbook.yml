@@ -1,0 +1,100 @@
+---
+- name: Provisionamento Ambiente Projeto Korp
+  hosts: localhost
+  connection: local
+  become: yes
+  vars:
+    project_dir: "/home/marcilio/projeto-korp"
+
+  tasks:
+    - name: Atualizar cache apt
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Instalar dependencias do Docker
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - software-properties-common
+          - python3-docker
+        state: present
+
+    - name: Criar diretorio keyrings se nao existir
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Baixar chave GPG do Docker
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+        force: yes
+
+    - name: Adicionar repositorio do Docker
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Instalar Docker e Docker Compose
+      apt:
+        name: 
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+
+    - name: Garantir que o servico do Docker esta rodando
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      ignore_errors: yes
+
+    - name: Criar rede Docker (korp-network) no modo bridge
+      docker_network:
+        name: korp-network
+        driver: bridge
+
+    - name: Build da imagem do serviço http-server-projeto-korp
+      docker_image:
+        name: http-server-projeto-korp
+        tag: latest
+        build:
+          path: "{{ project_dir }}/app"
+        source: build
+
+    - name: Subir containers usando docker-compose
+      command: docker compose up -d
+      args:
+        chdir: "{{ project_dir }}/docker"
+      register: compose_output
+
+    - name: Exibir saida do Docker Compose
+      debug:
+        var: compose_output.stdout_lines
+
+    - name: Aguardar o servico iniciar (10 segundos)
+      pause:
+        seconds: 10
+
+    - name: Validar funcionamento do servico atraves de requisicao HTTP
+      uri:
+        url: http://localhost:80/projeto-korp
+        method: GET
+        return_content: yes
+        status_code: 200
+      register: validation_response
+      until: validation_response.status == 200
+      retries: 5
+      delay: 5
+
+    - name: Exibir resposta da validacao no console
+      debug:
+        msg: "Resposta do Servico: {{ validation_response.json }}"
