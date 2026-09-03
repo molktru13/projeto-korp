@@ -123,35 +123,6 @@
       ]
     },
     {
-      "id": 4,
-      "title": "Requisições por Segundo",
-      "type": "stat",
-      "datasource": {
-        "uid": "PBFA97CFB590B2093"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 0
-      },
-      "targets": [
-        {
-          "datasource": {
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "sum(rate(http_requests_total[1m])) or vector(0)",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps"
-        }
-      },
-      "options": {}
-    },
-    {
       "id": 5,
       "title": "Latência P95",
       "type": "timeseries",
@@ -227,37 +198,6 @@
           }
         }
       }
-    },
-    {
-      "id": 7,
-      "title": "Taxa de Requisições",
-      "type": "timeseries",
-      "datasource": {
-        "uid": "PBFA97CFB590B2093"
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 4
-      },
-      "targets": [
-        {
-          "datasource": {
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "sum(rate(http_requests_total[1m])) or vector(0)",
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "sum(rate(http_requests_total[1m]))",
-          "refId": "B",
-          "legendFormat": "req/s"
-        }
-      ]
     }
   ]
 }
