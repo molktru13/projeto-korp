@@ -3,14 +3,16 @@ version: '3.8'
 services:
   http-server-projeto-korp:
     image: http-server-projeto-korp:latest
-    # A build process outside docker-compose or via build: directive. 
-    # The requirement says "Baseado na imagem construída anteriormente". 
+    restart: unless-stopped
+    # A build process outside docker-compose or via build: directive.
+    # The requirement says "Baseado na imagem construída anteriormente".
     # So Ansible will build it first, then docker-compose will use it.
     networks:
       - korp-network
 
   nginx:
     image: nginx:latest
+    restart: unless-stopped
     ports:
       - "80:80"
     volumes:
@@ -22,6 +24,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
+    restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
@@ -33,6 +36,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
