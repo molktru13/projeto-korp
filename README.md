@@ -73,10 +73,9 @@ O monitoramento é um dos grandes destaques do projeto. A aplicação Golang exp
 Toda a stack de infraestrutura é provisionada de forma totalmente automatizada. Em uma máquina Linux, basta rodar o comando único Ansible:
 
 ```bash
-cd ansible
+cd /home/SEU_USUÁRIO/projeto-korp/ansible
 ansible-playbook -i inventory playbook.yml
 ```
-> **Nota:** Se seu `sudo` pedir senha, use `ansible-playbook -i inventory playbook.yml -K` e informe a senha.
 
 ### Validação
 Após a execução do Ansible, você pode testar a disponibilidade do serviço no seu terminal:
